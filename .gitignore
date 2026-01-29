@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.pyc
+.env
+# Si no quieres subir los videos descargados (recomendado)
+data/videos/
+data/audio/

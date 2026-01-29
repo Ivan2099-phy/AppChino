@@ -1,0 +1,5 @@
+{
+    "whisper_model": "base",
+    "enable_ai": false,
+    "min_word_length": 1
+}

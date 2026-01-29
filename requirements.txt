@@ -1,0 +1,26 @@
+# Video/Audio Processing
+yt-dlp>=2024.1.0
+openai-whisper>=20231117
+
+# Text Processing - Chinese
+jieba>=0.42.1
+pypinyin>=0.51.0
+opencc-python-reimplemented>=0.1.7
+
+# Data Analysis
+pandas>=2.1.0
+numpy>=1.24.0
+
+# UI Framework
+PyQt5>=5.15.10
+PyQt5-Qt5>=5.15.2
+
+# AI/ML (Optional - for example generation)
+transformers>=4.35.0
+torch>=2.1.0
+sentencepiece>=0.1.99
+
+# Utilities
+requests>=2.31.0
+tqdm>=4.66.0
+python-dotenv>=1.0.0

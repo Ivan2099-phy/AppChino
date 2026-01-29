@@ -1,0 +1,1 @@
+# AppChino\n\nProyecto de ejemplo con estructura de módulos para procesamiento de video/audio, transcripción, análisis de texto y UI.
