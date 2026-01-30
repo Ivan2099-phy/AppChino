@@ -211,17 +211,38 @@ class MainWindow(QMainWindow):
         status_layout.addWidget(QLabel("Status:"))
         
         self.btn_known = QPushButton("✓ Known")
-        self.btn_known.setStyleSheet("background-color: #4CAF50; color: white;")
+        #self.btn_known.setStyleSheet("background-color: #4CAF50; color: white;")
+        self.btn_known.setStyleSheet("""
+            QPushButton {
+                background-color: #2D3A2D; color: #81C784; border: 1px solid #4CAF50;
+                border-radius: 15px; padding: 6px; font-weight: bold;
+            }
+            QPushButton:hover { background-color: #4CAF50; color: white; }
+        """)
         self.btn_known.clicked.connect(lambda: self.set_word_status('known'))
         status_layout.addWidget(self.btn_known)
         
         self.btn_practice = QPushButton("⚡ Practice")
-        self.btn_practice.setStyleSheet("background-color: #FFC107; color: white;")
+        #self.btn_practice.setStyleSheet("background-color: #FFC107; color: white;")
+        self.btn_practice.setStyleSheet("""
+            QPushButton {
+                background-color: #3E3520; color: #FFD54F; border: 1px solid #FFC107;
+                border-radius: 15px; padding: 6px; font-weight: bold;
+            }
+            QPushButton:hover { background-color: #FFC107; color: black; }
+        """)
         self.btn_practice.clicked.connect(lambda: self.set_word_status('practice'))
         status_layout.addWidget(self.btn_practice)
         
         self.btn_unknown = QPushButton("? Unknown")
-        self.btn_unknown.setStyleSheet("background-color: #F44336; color: white;")
+        #self.btn_unknown.setStyleSheet("background-color: #F44336; color: white;")
+        self.btn_unknown.setStyleSheet("""
+            QPushButton {
+                background-color: #3E2723; color: #E57373; border: 1px solid #F44336;
+                border-radius: 15px; padding: 6px; font-weight: bold;
+            }
+            QPushButton:hover { background-color: #F44336; color: white; }
+        """)
         self.btn_unknown.clicked.connect(lambda: self.set_word_status('unknown'))
         status_layout.addWidget(self.btn_unknown)
         
@@ -285,6 +306,7 @@ class MainWindow(QMainWindow):
                 background-color: #1E1E1E;
                 border-radius: 6px;
                 color: #D1D1D1;
+                font-size: 16px; /* Letra más grande */
                 outline: none;
                 padding: 5px;
             }
@@ -296,6 +318,24 @@ class MainWindow(QMainWindow):
                 background-color: #2D2D2D;
                 color: #4CAF50;
                 border-left: 3px solid #4CAF50;
+            }
+                           
+            QTextEdit {
+                font-size: 18px; /* Texto de ejemplos más legible */
+                line-height: 1.6;
+            }
+
+            /* Tabs (Pestañas) con mejor visibilidad */
+            QTabBar::tab {
+                background: #2D2D2D;
+                color: #AAA;
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+            QTabBar::tab:selected {
+                background: #3D3D3D;
+                color: #4CAF50;
+                border-bottom: 2px solid #4CAF50;
             }
         """)
 
@@ -499,18 +539,27 @@ class MainWindow(QMainWindow):
         
         # Populate lists
         for word in self.current_words:
-            display_text = f"{word['chinese']} ({word['pinyin']}) - {word['frequency']}x"
+            # Texto formateado con espacio
+            display_text = f"{word['chinese']}   {word['pinyin']}   ({word['frequency']}x)"
             
             item = QListWidgetItem(display_text)
             item.setData(Qt.UserRole, word)
             
-            # Color based on status
-            if word['status'] == 'known':
-                item.setBackground(QColor(200, 255, 200))
-            elif word['status'] == 'practice':
-                item.setBackground(QColor(255, 255, 200))
-            elif word['status'] == 'unknown':
-                item.setBackground(QColor(255, 200, 200))
+            # --- COLORES DINÁMICOS EN LA LISTA ---
+            status = word.get('status', 'unknown')
+            
+            if status == 'known':
+                # Fondo verde muy oscuro, texto verde pastel
+                item.setBackground(QColor("#152615")) 
+                item.setForeground(QColor("#A5D6A7")) 
+            elif status == 'practice':
+                # Fondo naranja muy oscuro, texto naranja pastel
+                item.setBackground(QColor("#262010"))
+                item.setForeground(QColor("#FFE082"))
+            elif status == 'unknown':
+                # Fondo normal (transparente/oscuro), texto rojo pastel suave
+                item.setBackground(QColor("#1E1E1E"))
+                item.setForeground(QColor("#EF9A9A"))
             
             # Add to all words
             self.all_words_list.addItem(item.clone())
@@ -529,95 +578,160 @@ class MainWindow(QMainWindow):
         if not word_data:
             return
         
-        # Obtener detalles completos de la palabra
+        # Guardamos el ID
+        self.current_word_id = word_data.get('word_id') or word_data.get('id')
+        
+        # Obtener detalles completos de la base de datos
         details = self.app.get_word_details(
-            word_data['word_id'],
+            self.current_word_id,
             self.current_video_id
         )
         
-        if not details:
-            return
+        # --- CORRECCIÓN HANZI: Respaldo de datos ---
+        # Si 'details' falla o viene vacío, usamos 'word_data' que viene de la lista y sabemos que sí tiene datos
+        safe_details = details if details else {}
         
-        # Almacenar ID para actualizaciones de estado
-        self.current_word_id = word_data['word_id']
+        chinese_word = safe_details.get('chinese') or safe_details.get('word') or word_data.get('chinese') or "---"
+        pinyin = safe_details.get('pinyin') or word_data.get('pinyin') or ""
+        translation = safe_details.get('translation') or safe_details.get('meaning') or safe_details.get('definition') or "No disponible"
+        hsk_level = safe_details.get('hsk_level') or word_data.get('hsk_level')
+        status = safe_details.get('status') or word_data.get('status') or 'unknown'
         
-        # --- EXTRACCIÓN SEGURA DE DATOS (Evita KeyError) ---
-        # Intentamos obtener el texto en chino de varias posibles llaves
-        chinese_word = details.get('chinese') or details.get('word') or details.get('hanzi') or "---"
-        pinyin = details.get('pinyin') or ""
-        # Buscamos la traducción en 'translation', 'meaning' o 'definition'
-        translation = details.get('translation') or details.get('meaning') or details.get('definition') or "No disponible"
-        hsk_level = details.get('hsk_level') or details.get('hsk')
-        status = details.get('status', 'unknown')
-        
-        # --- ACTUALIZACIÓN DE LA INTERFAZ ---
+        # --- ACTUALIZACIÓN DE TEXTOS ---
         self.word_chinese.setText(chinese_word)
         self.word_pinyin.setText(pinyin)
         self.word_translation.setText(translation)
         
+        # --- NUEVO: COLOR DEL PINYIN DINÁMICO ---
+        # Definimos el color del texto pinyin según el estado
+        pinyin_color = "#E0E0E0" # Blanco/Gris por defecto
+        if status == 'known':
+            pinyin_color = "#81C784" # Verde pastel
+        elif status == 'practice':
+            pinyin_color = "#FFD54F" # Amarillo pastel
+        elif status == 'unknown':
+            pinyin_color = "#E57373" # Rojo pastel
+            
+        self.word_pinyin.setStyleSheet(f"color: {pinyin_color}; font-style: italic; font-size: 18px; margin-bottom: 5px;")
+
+        # Texto HSK
         hsk_text = f"Nivel HSK: {hsk_level}" if hsk_level else "No está en HSK"
-        # Si tu widget se llama self.word_hsk o self.hsk_badge, asegúrate de que el nombre coincida
         if hasattr(self, 'word_hsk'):
             self.word_hsk.setText(hsk_text)
         
-        # Resaltar botones de estado
-        self.reset_status_buttons()
-        if status == 'known':
-            self.btn_known.setStyleSheet("background-color: #2E7D32; color: white; font-weight: bold;")
-        elif status == 'practice':
-            self.btn_practice.setStyleSheet("background-color: #F57C00; color: white; font-weight: bold;")
-        elif status == 'unknown':
-            self.btn_unknown.setStyleSheet("background-color: #C62828; color: white; font-weight: bold;")
+        # --- CORRECCIÓN BOTONES: Estilos Completos ---
+        self.reset_status_buttons() # Primero los ponemos en modo "borde"
         
-        # Mostrar ejemplos de uso
-        examples_html = "<h3>Ejemplos en el video:</h3>"
-        occurrences = details.get('occurrences', [])
+        # Al activarlos, debemos REPETIR el border-radius y padding, si no, se vuelven cuadrados
+        if status == 'known':
+            self.btn_known.setStyleSheet("""
+                QPushButton { background-color: #4CAF50; color: white; border: 1px solid #4CAF50; border-radius: 15px; padding: 6px; font-weight: bold; }
+            """)
+        elif status == 'practice':
+            self.btn_practice.setStyleSheet("""
+                QPushButton { background-color: #FFC107; color: black; border: 1px solid #FFC107; border-radius: 15px; padding: 6px; font-weight: bold; }
+            """)
+        elif status == 'unknown':
+            self.btn_unknown.setStyleSheet("""
+                QPushButton { background-color: #EF5350; color: white; border: 1px solid #EF5350; border-radius: 15px; padding: 6px; font-weight: bold; }
+            """)
+        
+        # --- MOSTRAR EJEMPLOS ---
+        examples_html = "<h3 style='color: #DDD;'>Ejemplos en el video:</h3>"
+        occurrences = safe_details.get('occurrences', [])
         
         if not occurrences:
-            examples_html += "<p>No se encontraron ejemplos de uso.</p>"
+            examples_html += "<p style='color: #888;'>No se encontraron ejemplos de uso.</p>"
         else:
-            for occ in occurrences[:10]:  # Mostrar máximo 10
+            for occ in occurrences[:10]:
                 sentence = occ.get('sentence', '')
                 timestamp = occ.get('timestamp')
                 
-                # Resaltar la palabra en la oración (si existe la palabra)
+                # Resaltar la palabra en azul claro dentro de la frase
                 if chinese_word != "---":
                     highlighted = sentence.replace(
                         chinese_word,
-                        f"<b style='color: #2196F3; font-size: 16px;'>{chinese_word}</b>"
+                        f"<b style='color: #64B5F6; font-size: 18px;'>{chinese_word}</b>"
                     )
                 else:
                     highlighted = sentence
                 
-                time_str = f" <small style='color: gray;'>[{int(timestamp)}s]</small>" if timestamp is not None else ""
-                examples_html += f"<p style='margin-bottom: 8px;'>• {highlighted}{time_str}</p>"
+                time_str = f" <span style='color: #666; font-size: 12px;'>[{int(timestamp)}s]</span>" if timestamp is not None else ""
+                examples_html += f"<p style='margin-bottom: 12px; color: #BBB;'>• {highlighted}{time_str}</p>"
         
         self.examples_text.setHtml(examples_html)
-    
+
     def reset_status_buttons(self):
-        """Reset status button styles"""
-        self.btn_known.setStyleSheet("background-color: #4CAF50; color: white;")
-        self.btn_practice.setStyleSheet("background-color: #FFC107; color: white;")
-        self.btn_unknown.setStyleSheet("background-color: #F44336; color: white;")
-    
+        """Restablece los botones a su estilo base moderno (solo bordes, sin relleno)"""
+        # Estilo base para el botón KNOWN (Verde)
+        self.btn_known.setStyleSheet("""
+            QPushButton {
+                background-color: #1E2E1E; 
+                color: #81C784; 
+                border: 1px solid #4CAF50;
+                border-radius: 15px; 
+                padding: 6px; 
+                font-weight: bold;
+            }
+            QPushButton:hover { background-color: #2E7D32; color: white; }
+        """)
+        
+        # Estilo base para el botón PRACTICE (Amarillo/Naranja)
+        self.btn_practice.setStyleSheet("""
+            QPushButton {
+                background-color: #2E2810; 
+                color: #FFD54F; 
+                border: 1px solid #FFC107;
+                border-radius: 15px; 
+                padding: 6px; 
+                font-weight: bold;
+            }
+            QPushButton:hover { background-color: #FFB300; color: black; }
+        """)
+        
+        # Estilo base para el botón UNKNOWN (Rojo)
+        self.btn_unknown.setStyleSheet("""
+            QPushButton {
+                background-color: #3E2723; 
+                color: #E57373; 
+                border: 1px solid #F44336;
+                border-radius: 15px; 
+                padding: 6px; 
+                font-weight: bold;
+            }
+            QPushButton:hover { background-color: #F44336; color: white; }
+        """)
+
     def set_word_status(self, status):
-        """Set status for current word"""
+        """Set status for current word y actualiza la UI inmediatamente"""
         if not hasattr(self, 'current_word_id'):
             return
         
         self.app.update_word_status(self.current_word_id, status)
         
-        # Refresh word list to update colors
+        # 1. Actualizar la lista (para que cambie el color en la lista de la izquierda)
         self.refresh_word_list()
         
-        # Update button highlight
+        # 2. Actualizar visualmente el PINYIN inmediatamente
+        pinyin_colors = {'known': "#81C784", 'practice': "#FFD54F", 'unknown': "#E57373"}
+        pinyin_color = pinyin_colors.get(status, "#E0E0E0")
+        self.word_pinyin.setStyleSheet(f"color: {pinyin_color}; font-style: italic; font-size: 18px; margin-bottom: 5px;")
+
+        # 3. Actualizar BOTONES (Estilos completos para mantener la forma redonda)
         self.reset_status_buttons()
+        
         if status == 'known':
-            self.btn_known.setStyleSheet("background-color: #2E7D32; color: white; font-weight: bold;")
+            self.btn_known.setStyleSheet("""
+                QPushButton { background-color: #4CAF50; color: white; border: 1px solid #4CAF50; border-radius: 15px; padding: 6px; font-weight: bold; }
+            """)
         elif status == 'practice':
-            self.btn_practice.setStyleSheet("background-color: #F57C00; color: white; font-weight: bold;")
+            self.btn_practice.setStyleSheet("""
+                QPushButton { background-color: #FFC107; color: black; border: 1px solid #FFC107; border-radius: 15px; padding: 6px; font-weight: bold; }
+            """)
         elif status == 'unknown':
-            self.btn_unknown.setStyleSheet("background-color: #C62828; color: white; font-weight: bold;")
+            self.btn_unknown.setStyleSheet("""
+                QPushButton { background-color: #EF5350; color: white; border: 1px solid #EF5350; border-radius: 15px; padding: 6px; font-weight: bold; }
+            """)
         
         self.status_bar.showMessage(f"Word marked as {status}", 2000)
     
