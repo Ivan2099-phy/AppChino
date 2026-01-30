@@ -180,7 +180,7 @@ class MainWindow(QMainWindow):
         
         input_group.setLayout(input_layout)
         main_layout.addWidget(input_group)
-        
+
         # === Main Content Area ===
         content_splitter = QSplitter(Qt.Horizontal)
         
@@ -690,11 +690,11 @@ class MainWindow(QMainWindow):
             """)
         
         # --- MOSTRAR EJEMPLOS ---
-        examples_html = "<h3 style='color: #DDD;'>Ejemplos en el video:</h3>"
+        examples_html = "<h3 style='color: #DDD;'>Examples on video:</h3>"
         occurrences = safe_details.get('occurrences', [])
         
         if not occurrences:
-            examples_html += "<p style='color: #888;'>No se encontraron ejemplos de uso.</p>"
+            examples_html += "<p style='color: #888;'>Can't find any examples on video.</p>"
         else:
             for occ in occurrences[:10]:
                 sentence = occ.get('sentence', '')
