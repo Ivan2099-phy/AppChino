@@ -1,3 +1,5 @@
+<img width="1830" height="1041" alt="Screenshot from 2026-01-30 16-47-54" src="https://github.com/user-attachments/assets/7efc8bf8-c541-4a08-af15-dd1c3abf7e52" />
+
 # AppChino
 # 🎥 AppChino v1.0 - Video Analyzer for Mandarin Learning
 
