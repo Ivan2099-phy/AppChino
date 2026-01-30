@@ -243,6 +243,40 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self.status_bar)
         self.status_bar.showMessage("Ready")
     
+        self.setStyleSheet("""
+            QMainWindow { background-color: #1e1e1e; }
+            QGroupBox { 
+                color: #ffffff; 
+                font-weight: bold; 
+                border: 1px solid #333; 
+                margin-top: 10px; 
+                border-radius: 5px;
+            }
+            QLabel { color: #dcdcdc; }
+            QLineEdit { 
+                background-color: #2b2b2b; 
+                border: 1px solid #3d3d3d; 
+                color: white; 
+                padding: 5px; 
+                border-radius: 4px;
+            }
+            QPushButton {
+                background-color: #3d3d3d;
+                color: white;
+                border-radius: 4px;
+                padding: 6px 12px;
+            }
+            QPushButton:hover { background-color: #4d4d4d; }
+            QListWidget {
+                background-color: #252525;
+                border: none;
+                color: #dcdcdc;
+            }
+            QListWidget::item:selected {
+                background-color: #3d3d3d;
+            }
+        """)
+
     def browse_file(self):
         """Open file browser to select video"""
         file_path, _ = QFileDialog.getOpenFileName(

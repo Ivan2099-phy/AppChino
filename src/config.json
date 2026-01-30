@@ -1,0 +1,11 @@
+{
+  "theme": "dark",
+  "splitter_sizes": [
+    265,
+    1000,
+    531
+  ],
+  "history_visible": true,
+  "auto_play_audio": false,
+  "anki_export_path": "/home/ivan-mart/Desktop"
+}
