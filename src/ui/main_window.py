@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QLabel, QLineEdit, QFileDialog, QTabWidget, QListWidget,
     QTextEdit, QProgressBar, QMessageBox, QListWidgetItem,
-    QSplitter, QGroupBox, QComboBox, QStatusBar
+    QSplitter, QGroupBox, QComboBox, QFrame, QStatusBar
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QFont, QColor
@@ -83,46 +83,99 @@ class MainWindow(QMainWindow):
         central_widget.setLayout(main_layout)
         
         # === Input Section ===
-        input_group = QGroupBox("Video Input")
+        input_group = QGroupBox("📥 Video Analysis Source")
         input_layout = QVBoxLayout()
+        input_layout.setSpacing(10)
+        input_layout.setContentsMargins(15, 20, 15, 15)
         
         # YouTube URL input
         youtube_layout = QHBoxLayout()
-        youtube_layout.addWidget(QLabel("YouTube URL:"))
+        yt_label = QLabel("YouTube URL:")
+        yt_label.setFixedWidth(100)
+        youtube_layout.addWidget(yt_label)
+        
         self.url_input = QLineEdit()
-        self.url_input.setPlaceholderText("https://youtube.com/watch?v=...")
+        self.url_input.setPlaceholderText("Paste YouTube link here...")
         youtube_layout.addWidget(self.url_input)
         
-        self.process_url_btn = QPushButton("Process YouTube Video")
+        self.process_url_btn = QPushButton("🚀 Process YouTube")
+        self.process_url_btn.setFixedWidth(180)
         self.process_url_btn.clicked.connect(self.process_youtube)
+        # Aplicamos estilo específico
+        self.process_url_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #c4302b; color: white; border-radius: 4px; 
+                padding: 8px; font-weight: bold; border: none;
+            }
+            QPushButton:hover { background-color: #ff0000; }
+            QPushButton:disabled { background-color: #555; }
+        """)
         youtube_layout.addWidget(self.process_url_btn)
-        
         input_layout.addLayout(youtube_layout)
         
+        # Separador visual sutil
+        line = QFrame()
+        line.setFrameShape(QFrame.HLine)
+        line.setFrameShadow(QFrame.Sunken)
+        line.setStyleSheet("background-color: #333; max-height: 1px; margin: 5px 0px;")
+        input_layout.addWidget(line)
+
         # Local file input
         file_layout = QHBoxLayout()
-        file_layout.addWidget(QLabel("Local File:"))
+        file_label = QLabel("Local File:")
+        file_label.setFixedWidth(100)
+        file_layout.addWidget(file_label)
+        
         self.file_path_input = QLineEdit()
-        self.file_path_input.setPlaceholderText("Select a video file...")
+        self.file_path_input.setPlaceholderText("No file selected...")
         self.file_path_input.setReadOnly(True)
         file_layout.addWidget(self.file_path_input)
         
-        self.browse_btn = QPushButton("Browse...")
+        self.browse_btn = QPushButton("📂 Browse")
+        self.browse_btn.setFixedWidth(100)
         self.browse_btn.clicked.connect(self.browse_file)
+        # Estilo para el botón de buscar
+        self.browse_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #333; color: #EEE; border: 1px solid #555; 
+                border-radius: 4px; padding: 7px;
+            }
+            QPushButton:hover { background-color: #444; border-color: #777; }
+        """)
         file_layout.addWidget(self.browse_btn)
         
-        self.process_file_btn = QPushButton("Process Local Video")
+        self.process_file_btn = QPushButton("⚙️ Process Local")
+        self.process_file_btn.setFixedWidth(180)
         self.process_file_btn.clicked.connect(self.process_local)
+        # Estilo para el botón de proceso local
+        self.process_file_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2196F3; color: white; border-radius: 4px; 
+                padding: 8px; font-weight: bold; border: none;
+            }
+            QPushButton:hover { background-color: #1E88E5; }
+            QPushButton:disabled { background-color: #555; }
+        """)
         file_layout.addWidget(self.process_file_btn)
-        
         input_layout.addLayout(file_layout)
         
-        # Progress bar
+        # Progress bar moderna
         self.progress_bar = QProgressBar()
         self.progress_bar.setVisible(False)
+        self.progress_bar.setFixedHeight(8)
+        self.progress_bar.setTextVisible(False)
+        self.progress_bar.setStyleSheet("""
+            QProgressBar {
+                background-color: #1E1E1E; border-radius: 4px; border: 1px solid #333;
+            }
+            QProgressBar::chunk {
+                background-color: #4CAF50; border-radius: 4px;
+            }
+        """)
         input_layout.addWidget(self.progress_bar)
         
         self.progress_label = QLabel("")
+        self.progress_label.setStyleSheet("color: #888; font-size: 11px;")
         input_layout.addWidget(self.progress_label)
         
         input_group.setLayout(input_layout)
