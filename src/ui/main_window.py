@@ -189,15 +189,18 @@ class MainWindow(QMainWindow):
         
         # Word info
         self.word_chinese = QLabel("")
-        self.word_chinese.setFont(QFont("Arial", 24, QFont.Bold))
+        self.word_chinese.setStyleSheet("color: #FFFFFF; margin-bottom: 5px;")
+        self.word_chinese.setFont(QFont("Microsoft YaHei", 32, QFont.Bold))
         details_layout.addWidget(self.word_chinese)
         
         self.word_pinyin = QLabel("")
+        self.word_pinyin.setStyleSheet("color: #4CAF50; font-style: italic;")
         self.word_pinyin.setFont(QFont("Arial", 14))
         details_layout.addWidget(self.word_pinyin)
         
         self.word_translation = QLabel("")
         self.word_translation.setFont(QFont("Arial", 12))
+        self.word_translation.setStyleSheet("color: #BBBBBB; font-size: 14px;")
         details_layout.addWidget(self.word_translation)
         
         self.word_hsk = QLabel("")
@@ -227,6 +230,16 @@ class MainWindow(QMainWindow):
         # Example sentences
         details_layout.addWidget(QLabel("Example Sentences:"))
         self.examples_text = QTextEdit()
+        self.examples_text.setStyleSheet("""
+            QTextEdit {
+                background-color: #181818;
+                border: none;
+                border-radius: 8px;
+                color: #AAAAAA;
+                line-height: 1.5;
+                padding: 10px;
+            }
+        """)
         self.examples_text.setReadOnly(True)
         details_layout.addWidget(self.examples_text)
         
@@ -244,36 +257,45 @@ class MainWindow(QMainWindow):
         self.status_bar.showMessage("Ready")
     
         self.setStyleSheet("""
-            QMainWindow { background-color: #1e1e1e; }
-            QGroupBox { 
-                color: #ffffff; 
-                font-weight: bold; 
-                border: 1px solid #333; 
-                margin-top: 10px; 
-                border-radius: 5px;
+            QMainWindow { background-color: #121212; }
+            
+            /* Grupos de entrada con bordes suaves */
+            QGroupBox {
+                color: #E0E0E0;
+                font-family: 'Segoe UI', sans-serif;
+                font-weight: bold;
+                border: 1px solid #333333;
+                border-radius: 8px;
+                margin-top: 15px;
+                padding-top: 10px;
             }
-            QLabel { color: #dcdcdc; }
-            QLineEdit { 
-                background-color: #2b2b2b; 
-                border: 1px solid #3d3d3d; 
-                color: white; 
-                padding: 5px; 
+            
+            /* Inputs modernos */
+            QLineEdit {
+                background-color: #1E1E1E;
+                border: 1px solid #333333;
                 border-radius: 4px;
+                color: #FFFFFF;
+                padding: 8px;
+                selection-background-color: #4CAF50;
             }
-            QPushButton {
-                background-color: #3d3d3d;
-                color: white;
-                border-radius: 4px;
-                padding: 6px 12px;
-            }
-            QPushButton:hover { background-color: #4d4d4d; }
+
+            /* Listas con items más espaciosos */
             QListWidget {
-                background-color: #252525;
-                border: none;
-                color: #dcdcdc;
+                background-color: #1E1E1E;
+                border-radius: 6px;
+                color: #D1D1D1;
+                outline: none;
+                padding: 5px;
+            }
+            QListWidget::item {
+                padding: 10px;
+                border-bottom: 1px solid #2A2A2A;
             }
             QListWidget::item:selected {
-                background-color: #3d3d3d;
+                background-color: #2D2D2D;
+                color: #4CAF50;
+                border-left: 3px solid #4CAF50;
             }
         """)
 
