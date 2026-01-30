@@ -24,15 +24,36 @@ class TextAnalyzer:
     @staticmethod
     def load_hsk_data(path: str) -> Dict[str, int]:
         """
-        Retorna:
-        {
-            "我": 1,
-            "喜欢": 1,
-            ...
-        }
+        Carga los datos HSK. 
+        Soporta formato Diccionario {"palabra": nivel} 
+        y formato Lista [{"hanzi": "palabra", "level": nivel}, ...]
         """
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                
+                # FIX: Si el JSON es una lista, lo convertimos a diccionario
+                if isinstance(data, list):
+                    hsk_dict = {}
+                    for item in data:
+                        # Intentamos obtener la palabra con las llaves más comunes
+                        word = item.get('hanzi') or item.get('word') or item.get('character')
+                        # Intentamos obtener el nivel
+                        level = item.get('level') or item.get('hsk_level')
+                        
+                        if word:
+                            hsk_dict[word] = level
+                    return hsk_dict
+                
+                # Si ya es un diccionario, lo devolvemos tal cual
+                return data
+                
+        except FileNotFoundError:
+            print(f"⚠️ Archivo no encontrado: {path}")
+            return {}
+        except Exception as e:
+            print(f"⚠️ Error cargando HSK data: {e}")
+            return {}
 
     @staticmethod
     def load_cedict(path: str) -> Dict[str, List[Dict[str, Any]]]:
